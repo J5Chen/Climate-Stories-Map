@@ -1,9 +1,14 @@
+from flask import redirect, session, url_for
 from flask_admin import Admin
 from flask_admin.base import AdminIndexView, expose
-from flask import session, redirect, url_for
+
+from app.extensions import admin
+from repos.repos import get_posts_collection, get_tags_collection, get_users_collection
+
 from .views import PostView, UserView
 
-def init_admin(app, collection, user_collection, admin_required, moderator_required=None):
+
+def init_admin(app):
     class ProtectedAdminIndexView(AdminIndexView):
         def is_accessible(self):
             # Allow access to admin and moderator users
@@ -27,16 +32,12 @@ def init_admin(app, collection, user_collection, admin_required, moderator_requi
             return redirect(url_for('postview.index_view'))  # Redirect to PostView by default
 
     # Initialize admin with the custom index view
-    admin = Admin(
-        app,
-        name='Climate Stories Map',
-        template_mode='bootstrap4',
-        base_template='admin/master.html',
-        index_view=ProtectedAdminIndexView()
-    )
-
+    admin._set_admin_index_view(ProtectedAdminIndexView())
+    admin.init_app(app)
     # Add PostView and UserView
-    admin.add_view(PostView(collection, 'Posts', endpoint='postview'))
-    admin.add_view(UserView(user_collection, 'Users', endpoint='userview'))  # Pass user_collection here
+    POSTS = get_posts_collection()
+    USERS = get_users_collection()
+    admin.add_view(PostView(POSTS, 'Posts', endpoint='postview'))
+    admin.add_view(UserView(USERS, 'Users', endpoint='userview'))  # Pass user_collection here
 
     return admin

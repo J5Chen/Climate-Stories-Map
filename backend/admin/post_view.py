@@ -1,8 +1,16 @@
+from flask import redirect, session, url_for
 from flask_admin.contrib.pymongo import ModelView
-from flask_admin.contrib.pymongo.filters import FilterEqual, FilterNotEqual, FilterLike, FilterGreater, FilterSmaller
+from flask_admin.contrib.pymongo.filters import (
+    FilterEqual,
+    FilterGreater,
+    FilterLike,
+    FilterNotEqual,
+    FilterSmaller,
+)
 from markupsafe import Markup
+
 from .forms import PostForm
-from flask import session, redirect, url_for
+
 
 class PostView(ModelView):
     def is_accessible(self):
@@ -17,7 +25,7 @@ class PostView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         try:
-            from flask import redirect, url_for, flash
+            from flask import flash, redirect, url_for
             flash("You do not have permission to access this page.", "danger")
             return redirect(url_for('login'))
         except Exception:
@@ -27,7 +35,7 @@ class PostView(ModelView):
     # Show the "Posts" button in the navigation bar for logged-in users
     def is_visible(self):
         # Show for admin and moderator users
-        return False #'user' in session and session['user'].get('role') in ['admin', 'moderator']
+        return True #'user' in session and session['user'].get('role') in ['admin', 'moderator']
 
     # List of columns to display
     column_list = ('title', 'content_image_display', 'content_description', 'location', 'tag', 'optionalTags', 'created_at', 'status')
